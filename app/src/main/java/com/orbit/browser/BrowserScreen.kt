@@ -70,16 +70,17 @@ fun BrowserScreen(
     val canGoForward by viewModel.canGoForward.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val progress by viewModel.progress.collectAsState()
+    val blockedCount by viewModel.blockedCount.collectAsState()
     val activeTab = tabs.firstOrNull { it.id == activeTabId }
 
     Row(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // ---- Left rail (Zephium sidebar) ----
+        // ---- Left rail (Zephium sidebar) — narrower, tighter (Patch 1.1). ----
         Column(
             modifier = Modifier
-                .width(288.dp)
+                .width(248.dp)
                 .fillMaxHeight()
                 .background(orbitChromeColor(darkTheme))
-                .padding(16.dp),
+                .padding(14.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -166,16 +167,22 @@ fun BrowserScreen(
             }
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 if (activeTab == null) {
-                    StartPage(onOpenSite = { url ->
-                        val tab = viewModel.activeTab() ?: return@StartPage
-                        viewModel.navigateActive(url)
-                        webViewHost.loadUrl(tab, url)
-                    })
+                    StartPage(
+                        blockedCount = blockedCount,
+                        onOpenSite = { url ->
+                            val tab = viewModel.activeTab() ?: return@StartPage
+                            viewModel.navigateActive(url)
+                            webViewHost.loadUrl(tab, url)
+                        },
+                    )
                 } else if (UrlUtils.isStartPage(activeTab.url)) {
-                    StartPage(onOpenSite = { url ->
-                        viewModel.navigateActive(url)
-                        webViewHost.loadUrl(activeTab, url)
-                    })
+                    StartPage(
+                        blockedCount = blockedCount,
+                        onOpenSite = { url ->
+                            viewModel.navigateActive(url)
+                            webViewHost.loadUrl(activeTab, url)
+                        },
+                    )
                 } else {
                     OrbitWebViewContainer(
                         host = webViewHost,
@@ -270,8 +277,10 @@ private fun AddressBar(
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
-            placeholder = { Text("Search or type an address") },
+            placeholder = { Text("Search or enter an address") },
             singleLine = true,
+            // Zephium's search is a centred pill, not a rectangle (Patch 1.1).
+            shape = RoundedCornerShape(50),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(onGo = { onNavigate(text) }),
             colors = OutlinedTextFieldDefaults.colors(
