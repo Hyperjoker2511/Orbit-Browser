@@ -39,6 +39,18 @@ class BrowserViewModel {
     private val _darkTheme = MutableStateFlow(true)
     val darkTheme: StateFlow<Boolean> = _darkTheme.asStateFlow()
 
+    /**
+     * Ads/trackers blocked in this session (the new-tab stat).
+     * Real count only — 0 until Patch 2 (Shields) wires the blocker in.
+     * Patch 2 increments this as requests are blocked.
+     */
+    private val _blockedCount = MutableStateFlow(0)
+    val blockedCount: StateFlow<Int> = _blockedCount.asStateFlow()
+
+    fun addBlocked(count: Int) {
+        _blockedCount.update { it + count }
+    }
+
     init {
         newTab()
     }
