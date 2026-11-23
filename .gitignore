@@ -1,0 +1,10 @@
+# Orbit .gitignore — never commit secrets or build outputs.
+*.keystore
+keystore.properties
+local.properties
+.gradle/
+build/
+app/build/
+.idea/
+*.iml
+.DS_Store
